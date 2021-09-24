@@ -1,0 +1,41 @@
+Dota 2 tournament emulator in console.
+Double-elimination.
+
+Player stats. (x/10)
+    Laning stage.
+    Agression.
+    Map awareness.
+    Reaction time.
+    Farm speed.
+    Hero pool.
+
+Team composition.
+    5 players.
+    1 coach. (optional)
+    1 manager. (optional)
+    Bootcamp avalable. (optional)
+    Fans harassment. (optional)
+    Jetlag. (optional)
+
+Match.
+    Plug player stats(boosted by team factors if they exist) into formula.
+    Formula. TODO
+
+Tournament.
+    Load team data from db(SQL).
+    Randomize seed.
+    Play one by one.
+
+More.
+    Team budget.
+    Player transfers.
+    Sponsorship.
+
+Controls.
+    Thruoght typing commands.
+    While True loop.
+    Display teams or single team.
+    Display brackets.
+    Emulate next match.
+    Emulate next round.
+    Show players profile.
