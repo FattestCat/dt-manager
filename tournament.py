@@ -27,7 +27,7 @@ def main():
     trn.bracket.generate_initial_team_pairs()
     while trn.bracket.get_winner() < 0:
         trn.bracket.play_round()
-    # print(trn)
+    print(trn)
 
 
 

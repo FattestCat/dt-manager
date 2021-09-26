@@ -12,7 +12,7 @@ class Bracket(Protocol):
     def get_next_round_matches(self) -> str: ...
     def get_winner(self) -> int: ...
 
-class OlimpicBracket(Bracket):
+class OlimpicBracket: # should we enh from Protocol
 
     def __init__(self, team_numbers: list[int]):
         if len(team_numbers) & (len(team_numbers) - 1) != 0 or len(team_numbers) < 1:

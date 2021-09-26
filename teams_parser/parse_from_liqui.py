@@ -8,15 +8,15 @@ from bs4 import BeautifulSoup
 BASE_URL = "https://liquipedia.net"
 TEAMS_URL = "https://liquipedia.net/dota2/Portal:Teams"
 
-def parse_teams_from_liqui(teams_url: str = TEAMS_URL, base_url: str = BASE_URL):
-    r = requests.get(teams_url)
+def parse_teams_from_liqui() -> dict:
+    r = requests.get(TEAMS_URL)
     soup = BeautifulSoup(r.text, "html.parser")
     teams = soup.find_all("span", {"class": "team-template-text"})
     teams_as_dict = {  }
 
     for team in teams[:5]:
         att = team.contents[0].attrs # type: ignore
-        teams_as_dict[att["title"]] = base_url + att["href"]
+        teams_as_dict[att["title"]] = BASE_URL + att["href"]
 
     return teams_as_dict
 
@@ -26,8 +26,12 @@ def parse_players_from_liqui(team_url: str):
     players_table = soup.find("div", {"class": "roster table-responsive"})
     players = players_table.find_all("td", {"class": "Name"}) # type: ignore
     positions = players_table.find_all("td", {"class": "PositionWoTeam2"}) # type: ignore
-    print(team_url)
+    # print(team_url)
+    players_as_dict = {  }
     for player, pos in zip(players, positions):
-        print(f"Player: {player.get_text().strip('()')}, pos: {pos.get_text()}") # type: ignore
-    return players
+        players_as_dict[player.get_text().strip('()')] = pos.get_text() # type: ignore
+        # print(f"Player: {player.get_text().strip('()')}, pos: {pos.get_text()}") # type: ignore
+    # print()
+    # TODO: must ruturn dict of players
+    return players_as_dict
 
