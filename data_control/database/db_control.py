@@ -1,10 +1,11 @@
 import pathlib
-from sqlalchemy import select
+from sqlalchemy import select, create_engine
+
 from .models import Player, Team, Base
 import data_control.team_struct as ts
 
 class DBControl:
-    cnt: list[int] = [1, ]
+    cnt: list[int] = [0, ]
     
     def __init__(self, db: str):
         if DBControl.is_db(db):
@@ -13,10 +14,15 @@ class DBControl:
             self.db = DBControl.autogenerate_name(self.cnt[0])
             # create no more than 10 files
             self.cnt[0] = 0 if self.cnt[0] > 10 else self.cnt[0] + 1
-        self.path = pathlib.Path(self.db)
+
+        self._path = pathlib.Path(self.db)
+        self._engine = create_engine(f"sqlite:///{self.db}", echo=True, future=True)
 
     def create_db(self) -> None:
-        self.path.touch()
+        self._path.touch()
+
+    def create_all(self) -> None:
+        Base.metadata.create_all(self._engine)
 
     def insert_team(self, team: ts.Team) -> Team:
         return Team(name=team.name)
@@ -39,15 +45,15 @@ class DBControl:
     def get_players_of_one_team(self, team: str) -> list[Player]:
         return list(select(Player).where(Player.team==team))
 
-    @staticmethod
-    def construct_team_from_dbdata(team: Team, players: list[Player]) -> ts.Team:
-        return ts.Team(team.name,
-                       "",
-                       [DBControl.construct_player_from_dbdata(p) for p in players])
+    # @staticmethod
+    # def construct_team_from_dbdata(team: Team, players: list[Player]) -> ts.Team:
+        # return ts.Team(team.name,
+                       # "",
+                       # [DBControl.construct_player_from_dbdata(p) for p in players])
 
-    @staticmethod
-    def construct_player_from_dbdata(player: Player) -> ts.Player:
-        return ts.Player(player.name, player.nickname, player.position)
+    # @staticmethod
+    # def construct_player_from_dbdata(player: Player) -> ts.Player:
+        # return ts.Player(player.name, player.nickname, player.position)
 
     @staticmethod
     def autogenerate_name(n) -> str:
@@ -60,7 +66,7 @@ class DBControl:
         return False
 
     def is_created(self) -> bool:
-        if self.path.is_file():
+        if self._path.is_file():
             return True
         return False
 
