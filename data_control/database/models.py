@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine, Column, String, Integer, ForeignKey
 from sqlalchemy.orm import declarative_base, relationship
 
-engine = create_engine("sqlite:///teams.db", echo=True, future=True)
+# engine = create_engine("sqlite:///teams.db", echo=True, future=True)
 Base = declarative_base()
 
 class Player(Base):
@@ -10,7 +10,7 @@ class Player(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(40))
     nickname = Column(String(40))
-    team = Column(Integer, ForeignKey("teams.id"))
+    team = Column(Integer, ForeignKey("teams.name"))
     position = Column(Integer, default=0)
     price = Column(Integer, default=0)
     salary = Column(Integer, default=0)
@@ -21,7 +21,7 @@ class Player(Base):
     farm_speed = Column(Integer, default=0)
     hero_pool = Column(Integer, default=0)
 
-    player_team = relationship("Team")
+    player_team = relationship("Team", back_populates="players")
     
 
     def __repr__(self):
@@ -32,21 +32,23 @@ class Team(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(30))
-    player_position_1 = Column(Integer, ForeignKey("players.id"))
-    player_position_2 = Column(Integer, ForeignKey("players.id"))
-    player_position_3 = Column(Integer, ForeignKey("players.id"))
-    player_position_4 = Column(Integer, ForeignKey("players.id"))
-    player_position_5 = Column(Integer, ForeignKey("players.id"))
+    # player_position_1 = Column(String, ForeignKey("players.nickname"))
+    # player_position_2 = Column(String, ForeignKey("players.nickname"))
+    # player_position_3 = Column(String, ForeignKey("players.nickname"))
+    # player_position_4 = Column(String, ForeignKey("players.nickname"))
+    # player_position_5 = Column(String, ForeignKey("players.nickname"))
     coach = Column(Integer, default=0)
     manager = Column(Integer, default=0)
     bootcamp = Column(Integer, default=0)
     jetlag = Column(Integer, default=0)
 
-    player_1 = relationship("Player")
-    player_2 = relationship("Player")
-    player_3 = relationship("Player")
-    player_4 = relationship("Player")
-    player_5 = relationship("Player")
+    # player_1 = relationship("Player")
+    # player_2 = relationship("Player")
+    # player_3 = relationship("Player")
+    # player_4 = relationship("Player")
+    # player_5 = relationship("Player")
+
+    players = relationship("Player", back_populates="player_team")
 
     def __repr__(self):
         return f"Team({self.id=}, {self.name=})"

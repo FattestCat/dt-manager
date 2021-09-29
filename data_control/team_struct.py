@@ -12,6 +12,13 @@ class Player:
     def __srt__(self):
         return self.__repr__()
 
+    def __eq__(self, other):
+        if (self.name == other.name
+                and self.nickname == other.nickname
+                and self.position == other.position):
+            return True
+        return False
+
 @dataclass
 class Team:
     name: str
