@@ -1,6 +1,10 @@
 import pathlib
+import shutil
+# from typing import Union
 from sqlalchemy import select, create_engine
+from sqlalchemy.orm import Session
 
+# import data_control.database.models as m
 from .models import Player, Team, Base
 import data_control.team_struct as ts
 
@@ -16,44 +20,48 @@ class DBControl:
             self.cnt[0] = 0 if self.cnt[0] > 10 else self.cnt[0] + 1
 
         self._path = pathlib.Path(self.db)
-        self._engine = create_engine(f"sqlite:///{self.db}", echo=True, future=True)
+        self._backup_path = pathlib.Path(self.db + ".bak")
+        self.engine = create_engine(f"sqlite:///{self.db}", echo=True, future=True)
 
     def create_db(self) -> None:
-        self._path.touch()
+        if not self._path.is_file():
+            self._path.touch()
+
+    def create_backup(self) -> None:
+        if self._path.is_file():
+            shutil.copy(self._path, self._backup_path)
 
     def create_all(self) -> None:
-        Base.metadata.create_all(self._engine)
+        Base.metadata.create_all(self.engine)
 
-    def insert_team(self, team: ts.Team) -> Team:
-        return Team(name=team.name)
+    def add_teams(self, session: Session, teams: list[Team]) -> None:
+        for team in teams:
+            if not self.get_team(session, team.name):
+                session.add(team)
 
-    def insert_player(self, player: ts.Player, team_name: str = "") -> Player:
-        return Player(name=player.name,
-                      nickname=player.nickname,
-                      team=team_name,
-                      position=player.position)
+    def add_team(self, session: Session, team: Team) -> None:
+        if not self.get_team(session, team.name):
+            session.add(team)
 
-    def get_team(self, name: str) -> Team:
-        return select(Team).where(Team.name==name)[0]
+    def get_team(self, session: Session, name: str) -> Team:
+        return session.query(Team).filter_by(name=name).first()
+        # return session.query(Team).filter(Team.name==name).first()
 
-    def get_team_with_players(self, team: str) -> tuple[Team, list[Player]]:
-        return (self.get_team(team), self.get_players_of_one_team(team))
+    def get_team_with_players(self, session: Session, team: str) -> tuple[Team, list[Player]]:
+        return (self.get_team(session, team), self.get_players_of_one_team(session, team))
 
-    def get_player(self, nickname: str) -> Player:
-        return select(Player).where(Player.nickname==nickname)[0]
+    def add_player(self, session, player: Player) -> None:
+        if not self.get_player(session, player.nickname):
+            session.add(player)
 
-    def get_players_of_one_team(self, team: str) -> list[Player]:
-        return list(select(Player).where(Player.team==team))
+    def get_player(self, session: Session, nickname: str) -> Player:
+        return session.query(Player).filter_by(nickname = nickname).first()
 
-    # @staticmethod
-    # def construct_team_from_dbdata(team: Team, players: list[Player]) -> ts.Team:
-        # return ts.Team(team.name,
-                       # "",
-                       # [DBControl.construct_player_from_dbdata(p) for p in players])
+    def get_players_of_one_team(self, session: Session, team: str) -> list[Player]:
+        return session.query(Player).filter_by(team=team).all()
 
-    # @staticmethod
-    # def construct_player_from_dbdata(player: Player) -> ts.Player:
-        # return ts.Player(player.name, player.nickname, player.position)
+    def get_all(self, session: Session) -> list[tuple[Team, list[Player]]]:
+        return [self.get_team_with_players(session, t.name) for t in session.query(Team).all()]
 
     @staticmethod
     def autogenerate_name(n) -> str:

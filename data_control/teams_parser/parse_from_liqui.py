@@ -1,6 +1,5 @@
 import requests
 from bs4 import BeautifulSoup
-from typing import Optional
 from pprint import pprint
 
 from ..team_struct import Team, Player
@@ -33,8 +32,8 @@ class LiquipediaParser:
         return self.teams
 
     @staticmethod
-    def _parse_players(team_url: str) -> list[Player]:
-        r = requests.get(team_url)
+    def _parse_players(team: Team) -> list[Player]:
+        r = requests.get(team.url)
         soup = BeautifulSoup(r.text, "html.parser")
         # table with players
         pt_soup = soup.find("div", {"class": "roster table-responsive"})
@@ -48,14 +47,15 @@ class LiquipediaParser:
             players.append(Player(
                             p.text.strip("() []"), # type: ignore
                             nn.text.strip("() "), # type: ignore
-                            pos.text.strip("() []")) # type: ignore
+                            pos.text.strip("() []"), # type: ignore
+                            team_name=team.name) # type: ignore
                            )
         print(f"Got players data {players}")
         return players
 
     def _update_teams(self) -> None:
         for tm in self.teams:
-            tm.players = LiquipediaParser._parse_players(tm.url)
+            tm.players = LiquipediaParser._parse_players(tm)
 
     def __repr__(self):
         return f"{self.TEAMS_URL}\n\n" + \
