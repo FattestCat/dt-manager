@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from pprint import pprint
+from typing import ClassVar
 
 from ..team_struct import Team, Player
 
@@ -8,7 +9,7 @@ class LiquipediaParser:
 
     BASE_URL: str = "https://liquipedia.net"
     TEAMS_URL: str = "https://liquipedia.net/dota2/Portal:Teams"
-    teams: list[Team] = [ ]
+    teams: ClassVar[dict[str, Team]] = { }
 
     def run(self):
         self._parse_teams()
@@ -18,7 +19,7 @@ class LiquipediaParser:
         self.run()
         
 
-    def _parse_teams(self) -> list[Team]:
+    def _parse_teams(self) -> dict[str, Team]:
         r = requests.get(self. TEAMS_URL)
         soup = BeautifulSoup(r.text, "html.parser")
         teams = soup.find_all("span", {"class": "team-template-text"})
@@ -26,8 +27,8 @@ class LiquipediaParser:
         for team in teams[:5]:
             att = team.contents[0].attrs # type: ignore
             tm = Team(att["title"], self.BASE_URL + att["href"])
-            self.teams.append(tm)
-            pprint(f"Got team data from {tm.url}")
+            self.teams[tm.name] = tm
+            pprint(f"Got team data: {tm.name} from {tm.url}")
 
         return self.teams
 
@@ -50,12 +51,12 @@ class LiquipediaParser:
                             pos.text.strip("() []"), # type: ignore
                             team_name=team.name) # type: ignore
                            )
-        print(f"Got players data {players}")
+        pprint(f"Got players data {players}")
         return players
 
     def _update_teams(self) -> None:
-        for tm in self.teams:
-            tm.players = LiquipediaParser._parse_players(tm)
+        for k in self.teams:
+            self.teams[k].players = LiquipediaParser._parse_players(self.teams[k])
 
     def __repr__(self):
         return f"{self.TEAMS_URL}\n\n" + \

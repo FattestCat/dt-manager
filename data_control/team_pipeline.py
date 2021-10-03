@@ -3,15 +3,15 @@ from .team_struct import Team, Player
 class Normalizer:
 
     def __init__(self, teams):
-        self.teams: list[Team] = teams
+        self.teams: dict[str, Team] = teams
         self._normalize()
 
-    def get_teams(self) -> list[Team]:
+    def get_teams(self) -> dict[str, Team]:
         return self.teams
 
     def _normalize(self):
-        for tm in self.teams:
-            tm.players = [p for p in tm.players if Normalizer._is_valid_player(p)]
+        for k in self.teams:
+            self.teams[k].players = [p for p in self.teams[k].players if Normalizer._is_valid_player(p)]
                 
 
     @staticmethod
@@ -27,7 +27,7 @@ class Normalizer:
         return False
 
     def __repr__(self):
-        return  "\n".join(str(t) for t in self.teams) + "\n"
+        return  "\n".join(str(self.teams[t]) for t in self.teams) + "\n"
                 
     def __srt__(self):
         return self.__repr__()

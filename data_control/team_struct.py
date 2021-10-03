@@ -7,16 +7,11 @@ class Player:
     position: str
     team_name: str = ""
 
-    def __repr__(self):
-        return f"{self.name} - {self.nickname}, {self.team_name} p:{self.position}"
-
-    def __srt__(self):
-        return self.__repr__()
-
     def __eq__(self, other):
         if (self.name == other.name
                 and self.nickname == other.nickname):
             return True
+        print(f'{self.name}, {self.nickname} != {other.name}, {other.nickname}')
         return False
 
 @dataclass
@@ -25,13 +20,6 @@ class Team:
     url: str
     players: list[Player] = field(default_factory=list)
 
-    def __repr__(self):
-        return f"{self.url}: {self.name}\nPlayers list:\n" + \
-                "\n".join(str(p) for p in self.players if p)
-
-    def __srt__(self):
-        return self.__repr__()
-
     def __eq__(self, other):
         if self.name == other.name:
             return True
@@ -39,4 +27,16 @@ class Team:
 
     def deep_eq(self, other):
         return self.__eq__(other) \
-            and all([(pp == po) for pp in self.players for po in other.players])
+            and all([(pp == po) for pp, po in zip(self.players, other.players)])
+
+    # def diff(self, other) -> list[Player]:
+        # if self.deep_eq(other):
+            # return [ ]
+        # diff_pl = [ ]
+        # for s_player in self.players:
+            # for o_player in other.players:
+                # if s_player.name == o_player.name:
+                    # continue
+                # else:
+                    # diff_pl.append(s_player)
+        # return diff_pl

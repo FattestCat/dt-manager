@@ -11,18 +11,17 @@ from data_control.database.models import Team, Player
 
 from data_control.converters import *
 
-from pprint import pprint
 
 team_with_players = tuple[Team, list[Player]]
 
 ch = Cache()
+staged_teams = [ ]
+staged_players = [ ]
 
-def get_parsed_data() -> list[ts.Team]:
+def get_parsed_data() -> dict[str, ts.Team]:
     parser = LiquipediaParser()
     parser.run()
     normalized = Normalizer(parser.teams)
-    
-
     return normalized.teams
 
 def get_data_from_db() -> list[team_with_players]:
@@ -34,12 +33,17 @@ def get_data_from_db() -> list[team_with_players]:
     return teams
 
 def cache_data(c: Cache, teams: list[team_with_players]) -> None:
-    c.cache([to_parsed_team_full(t) for t in teams])
-    print('-' * 20)
-    pprint([t for t in c.data])
+    c.cache({t[0].name: to_parsed_team_full(t) for t in teams})
 
-def check_diff(cache: Cache, data: list[ts.Team]):
-    ...
+def check_diff(cache: dict[str, ts.Team], data: dict[str, ts.Team]) -> bool:
+    return all([cache[k].deep_eq(data[k]) for k in cache])
+
+def check_team(t1: ts.Team, t2: ts.Team) -> bool:
+    if t1.deep_eq(t2):
+        return True
+
+    return False
+
 
 def push_to_db(teams: list[ts.Team]) -> None:
     pass
