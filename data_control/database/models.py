@@ -1,7 +1,6 @@
 from sqlalchemy import create_engine, Column, String, Integer, ForeignKey
 from sqlalchemy.orm import declarative_base, relationship
 
-# engine = create_engine("sqlite:///teams.db", echo=True, future=True)
 Base = declarative_base()
 
 class Player(Base):
@@ -25,28 +24,17 @@ class Player(Base):
     
 
     def __repr__(self):
-        return f"Player({self.id=}, {self.name=}, {self.nickname=})"
+        return f"Player({self.id=}, {self.name=}, {self.nickname=}, {self.team=})"
 
 class Team(Base):
     __tablename__ = "teams"
 
     id = Column(Integer, primary_key=True)
     name = Column(String(30))
-    # player_position_1 = Column(String, ForeignKey("players.nickname"))
-    # player_position_2 = Column(String, ForeignKey("players.nickname"))
-    # player_position_3 = Column(String, ForeignKey("players.nickname"))
-    # player_position_4 = Column(String, ForeignKey("players.nickname"))
-    # player_position_5 = Column(String, ForeignKey("players.nickname"))
     coach = Column(Integer, default=0)
     manager = Column(Integer, default=0)
     bootcamp = Column(Integer, default=0)
     jetlag = Column(Integer, default=0)
-
-    # player_1 = relationship("Player")
-    # player_2 = relationship("Player")
-    # player_3 = relationship("Player")
-    # player_4 = relationship("Player")
-    # player_5 = relationship("Player")
 
     players = relationship("Player", back_populates="player_team")
 
