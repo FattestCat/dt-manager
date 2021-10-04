@@ -1,12 +1,11 @@
 import pathlib
 import shutil
-# from typing import Union
+from typing import Union
 from sqlalchemy import select, create_engine
 from sqlalchemy.orm import Session
 
 # import data_control.database.models as m
 from .models import Player, Team, Base
-import data_control.team_struct as ts
 
 class DBControl:
     cnt: list[int] = [0, ]
@@ -27,41 +26,55 @@ class DBControl:
         if not self._path.is_file():
             self._path.touch()
 
-    def create_backup(self) -> None:
+    def _backup(self) -> None:
         if self._path.is_file():
             shutil.copy(self._path, self._backup_path)
 
     def create_all(self) -> None:
         Base.metadata.create_all(self.engine)
 
-    def add_teams(self, session: Session, teams: list[Team]) -> None:
-        for team in teams:
-            if not self.get_team(session, team.name):
-                session.add(team)
-
     def add_team(self, session: Session, team: Team) -> None:
         if not self.get_team(session, team.name):
             session.add(team)
 
-    def get_team(self, session: Session, name: str) -> Team:
-        return session.query(Team).filter_by(name=name).first()
-        # return session.query(Team).filter(Team.name==name).first()
-
-    def get_team_with_players(self, session: Session, team: str) -> tuple[Team, list[Player]]:
-        return (self.get_team(session, team), self.get_players_of_one_team(session, team))
+    def add_teams(self, session: Session, teams: dict[str, Team]) -> None:
+        for v in teams.values():
+            if not self.get_team(session, v.name):
+                session.add(v)
 
     def add_player(self, session, player: Player) -> None:
         if not self.get_player(session, player.nickname):
             session.add(player)
 
+    def add_players(self, session, players: dict[str, Player]) -> None:
+        for v in players.values():
+            self.add_player(session, v)
+
+    def get_team(self, session: Session, name: str) -> Team:
+        return session.query(Team).filter_by(name=name).first()
+
     def get_player(self, session: Session, nickname: str) -> Player:
         return session.query(Player).filter_by(nickname = nickname).first()
 
-    def get_players_of_one_team(self, session: Session, team: str) -> list[Player]:
-        return session.query(Player).filter_by(team=team).all()
+    def get_players_of_one_team(self, session: Session, team: str) -> dict[str, Player]:
+        return {p.nickname: p for p in session.query(Player).filter_by(team=team).all()}
 
-    def get_all(self, session: Session) -> list[tuple[Team, list[Player]]]:
-        return [self.get_team_with_players(session, t.name) for t in session.query(Team).all()]
+    def get_all(self, session: Session) -> dict[str, dict[str, Union[Team, Player]]]:
+        return {
+            "teams": {t.name: t for t in session.query(Team).all()},
+            "players": {p.nickname: p for p in session.query(Player).all()}
+        }
+
+    def update_player(self, session: Session, player: Player) -> None:
+        pl = self.get_player(session, player.nickname)
+        pl.name = player.name
+        pl.nickname = player.nickname
+        pl.team = player.team
+        session.add(pl)
+
+    def update_players(self, session: Session, players: dict[str, Player]) -> None:
+        for v in players.values():
+            self.update_player(session, v)
 
     @staticmethod
     def autogenerate_name(n) -> str:
@@ -78,5 +91,3 @@ class DBControl:
             return True
         return False
 
-    def db_update(self, teams: list[Team]) -> None:
-        pass

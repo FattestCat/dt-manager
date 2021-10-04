@@ -2,9 +2,9 @@ import requests
 from bs4 import BeautifulSoup
 from pprint import pprint
 
-import data_control.LPparser.LPmodels as lp
+import LPparser.LPmodels as lp
 
-MAX_TEAMS = 10
+MAX_TEAMS = 5
 
 class LiquipediaParser:
 

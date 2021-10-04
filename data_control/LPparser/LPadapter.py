@@ -1,5 +1,5 @@
-import data_control.LPparser.LPmodels as lp
-import data_control.database.models as m
+import LPparser.LPmodels as lp
+import database.models as m
 
 def to_db_player(player: lp.Player) -> m.Player:
     return m.Player(name=player.name,

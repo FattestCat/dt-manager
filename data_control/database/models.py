@@ -24,7 +24,7 @@ class Player(Base):
     
 
     def __repr__(self):
-        return f"Player({self.id=}, {self.name=}, {self.nickname=}, {self.team=})"
+        return f"Player(id:{self.id}, name:{self.name}, {self.nickname}, {self.team})"
 
 class Team(Base):
     __tablename__ = "teams"
