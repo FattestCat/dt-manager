@@ -26,6 +26,9 @@ class Player(Base):
     def __repr__(self):
         return f"Player(id:{self.id}, name:{self.name}, {self.nickname}, {self.team})"
 
+    def is_team_changed(self, other) -> bool:
+        return False if self.team == other.team else True
+
 class Team(Base):
     __tablename__ = "teams"
 

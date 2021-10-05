@@ -1,5 +1,4 @@
-from .database.models import Team, Player
-from copy import deepcopy
+from database.models import Team, Player
 
 teams: dict[str, Team] = { }
 players: dict[str, Player] = { }

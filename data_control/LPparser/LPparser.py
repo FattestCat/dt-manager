@@ -4,7 +4,7 @@ from pprint import pprint
 
 import LPparser.LPmodels as lp
 
-MAX_TEAMS = 5
+MAX_TEAMS = 15
 
 class LiquipediaParser:
 
@@ -22,11 +22,11 @@ class LiquipediaParser:
         
 
     def _parse_teams(self) -> dict[str, lp.Team]:
-        r = requests.get(self. TEAMS_URL)
+        r = requests.get(self.TEAMS_URL)
         soup = BeautifulSoup(r.text, "html.parser")
         teams = soup.find_all("span", {"class": "team-template-text"})
 
-        for team in teams[:MAX_TEAMS]:
+        for team in teams[:10]:
             att = team.contents[0].attrs # type: ignore
             tm = lp.Team(att["title"], self.BASE_URL + att["href"])
             self.teams[tm.name] = tm
